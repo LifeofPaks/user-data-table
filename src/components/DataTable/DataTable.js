@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Edit from "../../assets/edit.png";
 import Delete from "../../assets/delete.png";
@@ -8,112 +8,8 @@ const DataTable = (props) => {
   const [editRowsModel, setEditRowsModel] = useState({});
   const [editedData, setEditedData] = useState({});
   const [editData, setEditData] = useState(false);
+  const [localSelectionModel, setLocalSelectionModel] = useState([]);
 
-  // HANDLE DELETE FUNCTION
-  const handleDelete = (id) => {
-    // Remove the row with the specified id from the rows state
-    const updatedRows = props.rows.filter((row) => row.id !== id);
-
-    // Call the onDelete callback to notify the parent component
-    props.onDelete(updatedRows);
-
-    console.log(id, "has been deleted");
-  };
-
-  // HANDLE DELETE ALL FUNCTION
-  const handleDeleteAll = () => {
-    // Call the onDelete callback with an empty array to delete all rows
-    props.onDelete([]);
-
-    console.log("All rows have been deleted");
-  };
-
-  const handleEditRowsModelChange = (params) => {
-    console.log("Rows in edit mode:", params.api.current.getSelectedRows());
-    setEditRowsModel(params.model);
-  };
-
-  // HANDLE EDIT FUNCTION
-  const handleEditButtonClick = (id) => {
-    const editedRowId = id;
-
-    if (editedRowId) {
-      const editedRow = props.rows.find((row) => row.id === editedRowId);
-      setEditedData(editedRow);
-    }
-
-    setEditData(true);
-
-    console.log("Edit button clicked", editedRowId);
-  };
-
-  //   EDIT DATA MODAL
-  // Update the editedData state based on form input changes
-  const renderModal = () => {
-    const handleInputChange = (event) => {
-      const { name, value } = event.target;
-      setEditedData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    };
-
-    // Logic to update the original data with edited values
-    const handleSaveChanges = () => {
-      const updatedRows = props.rows.map((row) =>
-        row.id === editedData.id ? { ...row, ...editedData } : row
-      );
-
-      props.onSaveChanges(updatedRows);
-
-      // Close the modal after saving changes
-      setEditData(false);
-    };
-
-    // Logic to display an editable form with the details of the edited row
-    if (editedData) {
-      return (
-        <div>
-          <h2>Edit Row Details</h2>
-          <form>
-            <div className="inputWraps">
-              <label>Name</label>
-              <input
-                type="text"
-                name="name"
-                value={editedData.name}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="inputWraps">
-              <label>Email</label>
-              <input
-                type="text"
-                name="email"
-                value={editedData.email}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="inputWraps">
-                <label>Role</label>
-              <input
-                type="text"
-                name="role"
-                value={editedData.role}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <button type="button" onClick={handleSaveChanges}>
-              Save Changes
-            </button>
-          </form>
-        </div>
-      );
-    }
-
-    return null;
-  };
 
   // ACTION COLUMN
   const actionColumn = {
@@ -141,6 +37,123 @@ const DataTable = (props) => {
     },
   };
 
+  // HANDLE DELETE FUNCTION
+  const handleDelete = (id) => {
+    const updatedRows = props.rows.filter((row) => row.id !== id);
+
+    props.onDelete(updatedRows);
+  };
+
+  // HANDLE DELETE SELECTED FUNCTION
+  const handleDeleteSelected = () => {
+    const selectedIds = localSelectionModel || [];
+    const updatedRows = props.rows.filter(
+      (row) => !selectedIds.includes(row.id.toString())
+    );
+
+    props.onDelete(updatedRows);
+
+    if (props.onRowSelectionModelChange) {
+      props.onRowSelectionModelChange([]);
+    }
+  };
+
+  // HANDLE DELETE ALL FUNCTION
+  const handleDeleteAll = () => {
+    props.onDelete([]);
+  };
+
+  // HANDLE EDIT ROW DOUBLE CLICK FUNCTION
+  const handleEditRowsModelChange = (params) => {
+    console.log("Rows in edit mode:", params.api.current.getSelectedRows());
+    setEditRowsModel(params.model);
+
+    if (props.onRowSelectionModelChange) {
+      const selectedIds = params.api.current
+        .getSelectedRows()
+        .map((row) => row.id);
+      setLocalSelectionModel(selectedIds);
+      props.onRowSelectionModelChange(selectedIds);
+    }
+  };
+
+  // HANDLE EDIT FUNCTION
+  const handleEditButtonClick = (id) => {
+    const editedRowId = id;
+
+    if (editedRowId) {
+      const editedRow = props.rows.find((row) => row.id === editedRowId);
+      setEditedData(editedRow);
+    }
+
+    setEditData(true);
+  };
+
+  //   EDIT DATA MODAL
+  const renderModal = () => {
+    const handleInputChange = (event) => {
+      const { name, value } = event.target;
+      setEditedData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    };
+
+    if (editedData) {
+      return (
+        <div>
+          <h2>Edit Row Details</h2>
+          <form>
+            <div className="inputWraps">
+              <label>Name</label>
+              <input
+                type="text"
+                name="name"
+                value={editedData.name}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="inputWraps">
+              <label>Email</label>
+              <input
+                type="text"
+                name="email"
+                value={editedData.email}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="inputWraps">
+              <label>Role</label>
+              <input
+                type="text"
+                name="role"
+                value={editedData.role}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <button className="save" type="button" onClick={handleSaveChanges}>
+              Save Changes
+            </button>
+          </form>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  // Logic to update the original data with edited values
+  const handleSaveChanges = () => {
+    const updatedRows = props.rows.map((row) =>
+      row.id === editedData.id ? { ...row, ...editedData } : row
+    );
+
+    props.onSaveChanges(updatedRows);
+
+    setEditData(false);
+  };
+
   return (
     <div className="table">
       {editData && (
@@ -153,9 +166,17 @@ const DataTable = (props) => {
         </div>
       )}
 
-      <button className="deleteAll" onClick={handleDeleteAll}>
-        <img src={DeleteAll} alt="deleteAll" />
-      </button>
+      {localSelectionModel.length > 0 ? (
+        <button className="deleteAll" onClick={() => handleDeleteSelected()}>
+          Delete selected <img src={DeleteAll} alt="deleteAll" />
+        </button>
+      ) : (
+        <button className="deleteAll" onClick={handleDeleteAll}>
+
+          Delete all
+          <img src={DeleteAll} alt="deleteAll" />
+        </button>
+      )}
 
       <DataGrid
         className="dataGrid"
@@ -182,12 +203,15 @@ const DataTable = (props) => {
             </div>
           ),
         }}
+
         slotProps={{
-          toolbar: {
-            showQuickFilter: true,
-            quickFilterProps: { debounceMs: 500 },
-          },
-        }}
+            toolbar: {
+              showQuickFilter: true,
+              quickFilterProps: { debounceMs: 500 },
+              printOptions: { disableToolbarButton: true },
+            },
+          }}
+        
         pageSizeOptions={[5]}
         checkboxSelection
         disableRowSelectionOnClick
@@ -197,6 +221,13 @@ const DataTable = (props) => {
         editMode="row"
         editRowsModel={props.editRowsModel}
         onEditRowsModelChange={handleEditRowsModelChange}
+        setRowSelectionModel={localSelectionModel}
+        onRowSelectionModelChange={(setRowSelectionModel) => {
+          setLocalSelectionModel(setRowSelectionModel);
+          if (props.onRowSelectionModelChange) {
+            props.onRowSelectionModelChange(setRowSelectionModel);
+          }
+        }}
       />
     </div>
   );
