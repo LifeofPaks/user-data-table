@@ -4,9 +4,9 @@ import DataTable from '../DataTable/DataTable';
 
 const columns = [
   { field: 'id', headerName: 'ID', width: 70 },
-  { field: 'name', headerName: 'Name', width: 350, type: 'string', editable: true },
-  { field: 'email', headerName: 'Email', width: 350, type: 'string',  editable: true  },
-  { field: 'role', headerName: 'Role', width: 300, type: 'string',  editable: true  },
+  { field: 'name', headerName: 'NAME', width: 350, type: 'string', editable: true },
+  { field: 'email', headerName: 'EMAIL', width: 350, type: 'string',  editable: true  },
+  { field: 'role', headerName: 'ROLE', width: 300, type: 'string',  editable: true  },
 
 ];
 
