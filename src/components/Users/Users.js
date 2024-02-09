@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import DataTable from "../DataTable/DataTable";
+import { usersData } from "../../data/usersData";
+
 
 const columns = [
   { field: "id", headerName: "ID", width: 70 },
   {
     field: "name",
     headerName: "NAME",
-    width: 350,
+    width: 250,
     type: "string",
     editable: true,
   },
@@ -17,33 +19,41 @@ const columns = [
     type: "string",
     editable: true,
   },
+
   {
     field: "role",
     headerName: "ROLE",
-    width: 300,
+    width: 250,
+    type: "string",
+    editable: true,
+  },
+  {
+    field: "date",
+    headerName: "LAST SIGNED IN",
+    width: 200,
     type: "string",
     editable: true,
   },
 ];
 
 const Users = () => {
-  const [userRows, setUserRows] = useState([]);
+  const [userRows, setUserRows] = useState(usersData);
 
-  useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const res = await fetch(
-          "https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json"
-        );
-        const resData = await res.json();
-        setUserRows(resData);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const getUserData = async () => {
+  //     try {
+  //       const res = await fetch(
+  //         "https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json"
+  //       );
+  //       const resData = await res.json();
+  //       setUserRows(resData);
+  //     } catch (error) {
+  //       console.error("Error fetching user data:", error);
+  //     }
+  //   };
 
-    getUserData();
-  }, []);
+  //   getUserData();
+  // }, []);
 
   // Update the state with the edited rows
   const handleSaveChanges = (updatedRows) => {
