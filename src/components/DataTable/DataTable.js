@@ -48,7 +48,7 @@ const DataTable = (props) => {
   const handleDeleteSelected = () => {
     const selectedIds = localSelectionModel || [];
     const updatedRows = props.rows.filter(
-      (row) => !selectedIds.includes(row.id.toString())
+      (row) => !selectedIds.includes(row.id)
     );
 
     props.onDelete(updatedRows);
@@ -57,6 +57,7 @@ const DataTable = (props) => {
       props.onRowSelectionModelChange([]);
     }
   };
+
 
   // HANDLE DELETE ALL FUNCTION
   const handleDeleteAll = () => {
